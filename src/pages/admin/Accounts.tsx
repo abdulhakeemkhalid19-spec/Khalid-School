@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { ROLES } from '../../lib/constants'
-import { UserCog, Search, Save } from 'lucide-react'
+import { UserCog, Search, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Accounts() {
@@ -35,6 +35,21 @@ export default function Accounts() {
     onError: (e: any) => toast.error(e.message)
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['all-users'] })
+      toast.success('Account deleted!')
+    },
+    onError: (e: any) => toast.error(e.message)
+  })
+
   const filtered = users?.filter((u: any) =>
     u.user_id?.toLowerCase().includes(search.toLowerCase()) ||
     u.role?.toLowerCase().includes(search.toLowerCase())
@@ -42,7 +57,6 @@ export default function Accounts() {
 
   return (
     <div className="space-y-4">
-      {/* Search */}
       <div className="relative">
         <Search size={16} className="absolute left-3 top-3 text-gray-400" />
         <input
@@ -53,7 +67,6 @@ export default function Accounts() {
         />
       </div>
 
-      {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Loading...</div>
@@ -71,6 +84,7 @@ export default function Accounts() {
                   <th className="text-left p-3 text-sm">Current Role</th>
                   <th className="text-left p-3 text-sm">Change Role</th>
                   <th className="text-left p-3 text-sm">Joined</th>
+                  <th className="text-left p-3 text-sm">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,6 +120,18 @@ export default function Accounts() {
                     <td className="p-3 text-xs text-gray-500">
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => {
+                          if (confirm('Delete this account?')) {
+                            deleteMutation.mutate(user.user_id)
+                          }
+                        }}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -115,4 +141,4 @@ export default function Accounts() {
       </div>
     </div>
   )
-}
+            }
