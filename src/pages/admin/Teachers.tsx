@@ -13,6 +13,7 @@ interface Teacher {
   type: 'primary' | 'secondary'
   assigned_class?: string
   subject?: string
+  is_also_subject_teacher?: boolean
 }
 
 export default function Teachers() {
@@ -138,11 +139,25 @@ export default function Teachers() {
                   <tr key={t.id} className="border-b hover:bg-gray-50">
                     <td className="p-3 text-sm font-medium">{t.full_name}</td>
                     <td className="p-3 text-sm">{t.email}</td>
-                    <td className="p-3 text-sm capitalize">{t.type}</td>
                     <td className="p-3 text-sm">
-                      {t.type === 'primary'
-                        ? t.assigned_class ?? '—'
-                        : t.subject ?? '—'}
+                      <div className="flex flex-col gap-1">
+                        <span className="capitalize">{t.type}</span>
+                        {t.is_also_subject_teacher && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            + Subject Teacher
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-3 text-sm">
+                      <div className="flex flex-col gap-1">
+                        {t.type === 'primary' && (
+                          <span>{t.assigned_class ?? '—'}</span>
+                        )}
+                        {(t.type === 'secondary' || t.is_also_subject_teacher) && (
+                          <span className="text-blue-600">{t.subject ?? '—'}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-3">
                       <div className="flex gap-2">
@@ -250,10 +265,28 @@ export default function Teachers() {
                   </select>
                 </div>
               )}
-              {form.type === 'secondary' && (
+              {form.type === 'primary' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject
+                    Also a Subject Teacher?
+                  </label>
+                  <select
+                    value={form.is_also_subject_teacher ? 'yes' : 'no'}
+                    onChange={(e) => setForm({
+                      ...form,
+                      is_also_subject_teacher: e.target.value === 'yes'
+                    })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              )}
+              {(form.type === 'secondary' || form.is_also_subject_teacher) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject Teaching
                   </label>
                   <input
                     value={form.subject ?? ''}
@@ -284,4 +317,4 @@ export default function Teachers() {
       )}
     </div>
   )
-}
+                    }
