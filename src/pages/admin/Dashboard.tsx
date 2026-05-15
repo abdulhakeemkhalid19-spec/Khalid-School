@@ -13,6 +13,7 @@ import {
   Calendar,
   Clock,
   CreditCard,
+  Link,
 } from 'lucide-react'
 import AdminHome from './Home'
 import Students from './Students'
@@ -26,6 +27,7 @@ import Analytics from './Analytics'
 import Timetable from './Timetable'
 import SchoolCalendar from './SchoolCalendar'
 import Payments from './Payments'
+import LinkParents from './LinkParents'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -39,6 +41,7 @@ const navItems = [
   { to: '/timetable', label: 'Timetable', icon: Clock },
   { to: '/calendar', label: 'Calendar', icon: Calendar },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/link-parents', label: 'Link Parents', icon: Link },
   { to: '/accounts', label: 'Accounts', icon: UserCog },
 ]
 
@@ -103,6 +106,11 @@ export default function AdminDashboard() {
       <Route path="/analytics" element={
         <Layout navItems={navItems} title="Analytics">
           <Analytics />
+        </Layout>
+      } />
+      <Route path="/link-parents" element={
+        <Layout navItems={navItems} title="Link Parents & Students">
+          <LinkParents />
         </Layout>
       } />
       <Route path="/accounts" element={
