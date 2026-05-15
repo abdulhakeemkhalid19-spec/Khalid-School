@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
-import { Users, BookOpen, ClipboardList } from 'lucide-react'
+import { Users, BookOpen, ClipboardList, Bell } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export default function TeacherHome() {
   const { user } = useAuth()
 
   const { data: teacher } = useQuery({
-    queryKey: ['teacher-profile', user?.id],
+    queryKey: ['teacher-profile', user?.email],
     queryFn: async () => {
       const { data } = await supabase
         .from('teachers')
@@ -20,15 +21,24 @@ export default function TeacherHome() {
   })
 
   const { data: students } = useQuery({
-    queryKey: ['teacher-students', teacher?.assigned_class],
+    queryKey: ['teacher-students', teacher?.assigned_class, teacher?.subject, teacher?.type],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('students')
-        .select('*')
-        .eq('class', teacher?.assigned_class)
-      return data ?? []
+      if (teacher?.type === 'primary') {
+        const { data } = await supabase
+          .from('students')
+          .select('*')
+          .eq('class', teacher?.assigned_class)
+        return data ?? []
+      } else {
+        // Secondary teacher — load all students
+        const { data } = await supabase
+          .from('students')
+          .select('*')
+          .order('class')
+        return data ?? []
+      }
     },
-    enabled: !!teacher?.assigned_class
+    enabled: !!teacher
   })
 
   const { data: notices } = useQuery({
@@ -53,7 +63,7 @@ export default function TeacherHome() {
         <p className="text-blue-200 text-sm">
           {teacher?.type === 'primary'
             ? `Form Teacher — ${teacher?.assigned_class}`
-            : `Subject Teacher — ${teacher?.subject}`}
+            : `Subject Teacher — ${teacher?.subject ?? 'No subject assigned'}`}
         </p>
       </div>
 
@@ -66,13 +76,15 @@ export default function TeacherHome() {
           <p className="text-2xl font-bold text-school-dark">
             {students?.length ?? 0}
           </p>
-          <p className="text-sm text-gray-500">My Students</p>
+          <p className="text-sm text-gray-500">
+            {teacher?.type === 'primary' ? 'My Students' : 'All Students'}
+          </p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3">
             <BookOpen size={20} className="text-white" />
           </div>
-          <p className="text-2xl font-bold text-school-dark">
+          <p className="text-sm font-bold text-school-dark">
             {teacher?.type === 'primary' ? 'All Subjects' : teacher?.subject ?? '—'}
           </p>
           <p className="text-sm text-gray-500">Teaching</p>
