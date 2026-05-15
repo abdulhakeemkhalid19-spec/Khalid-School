@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Clock,
   Calendar,
+  Library,
 } from 'lucide-react'
 import TeacherHome from './Home'
 import TeacherStudents from './Students'
@@ -14,12 +15,14 @@ import TeacherGrades from './Grades'
 import TeacherAttendance from './Attendance'
 import TeacherTimetable from './Timetable'
 import TeacherCalendar from './Calendar'
+import TeacherSubjects from './Subjects'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/students', label: 'My Students', icon: Users },
   { to: '/grades', label: 'Grades', icon: BookOpen },
   { to: '/attendance', label: 'Attendance', icon: ClipboardList },
+  { to: '/subjects', label: 'Subjects', icon: Library },
   { to: '/timetable', label: 'Timetable', icon: Clock },
   { to: '/calendar', label: 'Calendar', icon: Calendar },
 ]
@@ -50,6 +53,11 @@ export default function TeacherDashboard() {
       <Route path="/attendance" element={
         <Layout navItems={navItems} title="Attendance">
           <TeacherAttendance />
+        </Layout>
+      } />
+      <Route path="/subjects" element={
+        <Layout navItems={navItems} title="Subjects">
+          <TeacherSubjects />
         </Layout>
       } />
       <Route path="/timetable" element={
