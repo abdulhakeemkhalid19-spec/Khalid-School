@@ -7,7 +7,7 @@ import {
   ClipboardList,
   Clock,
   Calendar,
-  Library,
+  BookMarked,
 } from 'lucide-react'
 import TeacherHome from './Home'
 import TeacherStudents from './Students'
@@ -22,7 +22,7 @@ const navItems = [
   { to: '/students', label: 'My Students', icon: Users },
   { to: '/grades', label: 'Grades', icon: BookOpen },
   { to: '/attendance', label: 'Attendance', icon: ClipboardList },
-  { to: '/subjects', label: 'Subjects', icon: Library },
+  { to: '/subjects', label: 'Subjects', icon: BookMarked },
   { to: '/timetable', label: 'Timetable', icon: Clock },
   { to: '/calendar', label: 'Calendar', icon: Calendar },
 ]
