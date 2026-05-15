@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
-import { CLASSES, DEPARTMENTS } from '../../lib/constants'
 import { UserPlus, Search, Edit, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -15,7 +14,7 @@ export default function TeacherStudents() {
   const [form, setForm] = useState<any>({})
 
   const { data: teacher } = useQuery({
-    queryKey: ['teacher-profile', user?.id],
+    queryKey: ['teacher-profile', user?.email],
     queryFn: async () => {
       const { data } = await supabase
         .from('teachers')
@@ -28,21 +27,32 @@ export default function TeacherStudents() {
   })
 
   const { data: students, isLoading } = useQuery({
-    queryKey: ['teacher-students', teacher?.assigned_class],
+    queryKey: ['teacher-students', teacher?.assigned_class, teacher?.type],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('students')
-        .select('*')
-        .eq('class', teacher?.assigned_class)
-        .order('full_name')
-      return data ?? []
+      if (teacher?.type === 'primary') {
+        const { data } = await supabase
+          .from('students')
+          .select('*')
+          .eq('class', teacher?.assigned_class)
+          .order('full_name')
+        return data ?? []
+      } else {
+        const { data } = await supabase
+          .from('students')
+          .select('*')
+          .order('class')
+        return data ?? []
+      }
     },
-    enabled: !!teacher?.assigned_class
+    enabled: !!teacher
   })
 
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
-      const studentData = { ...data, class: teacher?.assigned_class }
+      const studentData = {
+        ...data,
+        class: teacher?.type === 'primary' ? teacher?.assigned_class : data.class
+      }
       if (editing) {
         const { error } = await supabase
           .from('students')
@@ -93,11 +103,10 @@ export default function TeacherStudents() {
     saveMutation.mutate(form)
   }
 
-  if (!teacher?.assigned_class) {
+  if (!teacher) {
     return (
       <div className="bg-white rounded-xl p-12 text-center text-gray-400 shadow-sm">
-        <p>You are not assigned to any class yet.</p>
-        <p className="text-sm mt-1">Please contact the admin.</p>
+        <p>Loading teacher profile...</p>
       </div>
     )
   }
@@ -114,19 +123,23 @@ export default function TeacherStudents() {
             className="w-full pl-9 pr-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
           />
         </div>
-        <button
-          onClick={() => { setShowForm(true); setEditing(null); setForm({}) }}
-          className="flex items-center gap-2 bg-school-dark text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-school-blue"
-        >
-          <UserPlus size={16} />
-          Add Student
-        </button>
+        {teacher?.type === 'primary' && (
+          <button
+            onClick={() => { setShowForm(true); setEditing(null); setForm({}) }}
+            className="flex items-center gap-2 bg-school-dark text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-school-blue"
+          >
+            <UserPlus size={16} />
+            Add Student
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b">
           <h3 className="font-semibold text-school-dark">
-            {teacher?.assigned_class} — {students?.length ?? 0} Students
+            {teacher?.type === 'primary'
+              ? `${teacher?.assigned_class} — ${students?.length ?? 0} Students`
+              : `All Students offering ${teacher?.subject} — ${students?.length ?? 0} Students`}
           </h3>
         </div>
         {isLoading ? (
@@ -143,34 +156,39 @@ export default function TeacherStudents() {
                   </div>
                   <div>
                     <p className="font-medium text-sm">{s.full_name}</p>
-                    <p className="text-xs text-gray-500">{s.gender} {s.age ? `• Age ${s.age}` : ''}</p>
+                    <p className="text-xs text-gray-500">
+                      {s.class} {s.gender ? `• ${s.gender}` : ''}
+                      {teacher?.type === 'secondary' ? ` • ${s.class}` : ''}
+                    </p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setEditing(s); setForm(s); setShowForm(true) }}
-                    className="p-1.5 text-blue-500 hover:bg-blue-50 rounded"
-                  >
-                    <Edit size={15} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm('Delete this student?')) {
-                        deleteMutation.mutate(s.id)
-                      }
-                    }}
-                    className="p-1.5 text-red-500 hover:bg-red-50 rounded"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+                {teacher?.type === 'primary' && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setEditing(s); setForm(s); setShowForm(true) }}
+                      className="p-1.5 text-blue-500 hover:bg-blue-50 rounded"
+                    >
+                      <Edit size={15} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('Delete this student?')) {
+                          deleteMutation.mutate(s.id)
+                        }
+                      }}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {showForm && (
+      {showForm && teacher?.type === 'primary' && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
@@ -253,4 +271,4 @@ export default function TeacherStudents() {
       )}
     </div>
   )
-}
+                  }
