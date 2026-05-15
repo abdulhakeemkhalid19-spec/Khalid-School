@@ -45,6 +45,19 @@ export default function TeacherGrades() {
     enabled: !!teacher?.assigned_class
   })
 
+  const { data: classSubjects } = useQuery({
+    queryKey: ['class-subjects', teacher?.assigned_class],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('class_subjects')
+        .select('*')
+        .eq('class', teacher?.assigned_class)
+        .order('subject')
+      return data ?? []
+    },
+    enabled: !!teacher?.assigned_class
+  })
+
   const { data: grades } = useQuery({
     queryKey: ['grades', teacher?.assigned_class, selectedTerm, selectedSession],
     queryFn: async () => {
@@ -75,8 +88,7 @@ export default function TeacherGrades() {
   })
 
   const subjects = teacher?.type === 'primary'
-    ? ['English', 'Mathematics', 'Basic Science', 'Social Studies',
-       'Civic Education', 'Agricultural Science', 'French', 'Islamic Studies']
+    ? classSubjects?.map((s: any) => s.subject) ?? []
     : [teacher?.subject ?? '']
 
   const filtered = students?.filter((s: any) =>
@@ -90,7 +102,7 @@ export default function TeacherGrades() {
   }
 
   const updateGrade = (studentId: string, subject: string, field: string, value: string) => {
-    const key = `${studentId}-${subject}`
+    const key = `${studentId}|${subject}`
     const existing = editingGrades[key] ?? getStudentGrade(studentId, subject) ?? {}
     setEditingGrades({
       ...editingGrades,
@@ -100,8 +112,8 @@ export default function TeacherGrades() {
 
   const saveGrades = () => {
     const toSave = Object.entries(editingGrades).map(([key, data]: any) => {
-      const [studentId, ...subjectParts] = key.split('-')
-      const subject = subjectParts.join('-')
+      const studentId = key.substring(0, 36)
+      const subject = key.substring(37)
       const ca1 = data.ca1 ?? 0
       const ca2 = data.ca2 ?? 0
       const exam = data.exam ?? 0
@@ -129,6 +141,15 @@ export default function TeacherGrades() {
     return (
       <div className="bg-white rounded-xl p-12 text-center text-gray-400 shadow-sm">
         <p>Loading teacher profile...</p>
+      </div>
+    )
+  }
+
+  if (subjects.length === 0) {
+    return (
+      <div className="bg-white rounded-xl p-12 text-center text-gray-400 shadow-sm">
+        <p>No subjects added yet.</p>
+        <p className="text-sm mt-1">Go to Subjects page to add subjects first!</p>
       </div>
     )
   }
@@ -178,7 +199,7 @@ export default function TeacherGrades() {
             <thead className="bg-school-dark text-white">
               <tr>
                 <th className="text-left p-3 sticky left-0 bg-school-dark">Student</th>
-                {subjects.map(s => (
+                {subjects.map((s: string) => (
                   <th key={s} className="p-3 text-center min-w-[140px]">
                     <div>{s}</div>
                     <div className="text-xs font-normal text-blue-200 flex gap-1 justify-center mt-1">
@@ -197,8 +218,8 @@ export default function TeacherGrades() {
                   <td className="p-3 font-medium sticky left-0 bg-white">
                     {student.full_name}
                   </td>
-                  {subjects.map(subject => {
-                    const key = `${student.id}-${subject}`
+                  {subjects.map((subject: string) => {
+                    const key = `${student.id}|${subject}`
                     const existing = getStudentGrade(student.id, subject)
                     const editing = editingGrades[key]
                     const ca1 = editing?.ca1 ?? existing?.ca1 ?? ''
@@ -255,4 +276,4 @@ export default function TeacherGrades() {
       </div>
     </div>
   )
-}
+            }
