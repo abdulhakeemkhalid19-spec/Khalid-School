@@ -41,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
+    let timeout: any
 
     const init = async () => {
       try {
@@ -57,6 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (mounted) setLoading(false)
       }
     }
+
+    // Force loading to false after 5 seconds no matter what
+    timeout = setTimeout(() => {
+      if (mounted) setLoading(false)
+    }, 5000)
 
     init()
 
@@ -77,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false
+      clearTimeout(timeout)
       subscription.unsubscribe()
     }
   }, [])
