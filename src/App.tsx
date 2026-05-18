@@ -33,6 +33,15 @@ function AppRoutes() {
 
   if (!user) return <Login />
 
+  if (user && !role && !timedOut) return (
+    <div className="min-h-screen bg-school-dark flex items-center justify-center">
+      <div className="text-white text-center">
+        <div className="text-4xl mb-4">📚</div>
+        <p>Loading...</p>
+      </div>
+    </div>
+  )
+
   if (role === 'admin') return (
     <Routes>
       <Route path="/*" element={<AdminDashboard />} />
