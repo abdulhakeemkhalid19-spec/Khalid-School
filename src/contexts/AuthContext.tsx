@@ -20,6 +20,8 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 })
 
+const roleCache: Record<string, Role> = {}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -27,13 +29,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchRole = async (userId: string) => {
+    if (roleCache[userId]) {
+      setRole(roleCache[userId])
+      return
+    }
     try {
       const { data } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .single()
-      setRole((data?.role as Role) ?? null)
+      const r = (data?.role as Role) ?? null
+      roleCache[userId] = r
+      setRole(r)
     } catch {
       setRole(null)
     }
@@ -41,30 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
-    let timeout: any
 
-    const init = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!mounted) return
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          await fetchRole(session.user.id)
-        }
-      } catch {
-        // ignore
-      } finally {
-        if (mounted) setLoading(false)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        await fetchRole(session.user.id)
       }
-    }
-
-    // Force loading to false after 5 seconds no matter what
-    timeout = setTimeout(() => {
       if (mounted) setLoading(false)
-    }, 5000)
-
-    init()
+    })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -77,18 +71,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setRole(null)
         }
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     )
 
     return () => {
       mounted = false
-      clearTimeout(timeout)
       subscription.unsubscribe()
     }
   }, [])
 
   const signOut = async () => {
+    const userId = user?.id
+    if (userId) delete roleCache[userId]
     await supabase.auth.signOut()
     setUser(null)
     setSession(null)
