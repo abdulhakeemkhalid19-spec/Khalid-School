@@ -18,7 +18,7 @@ function AppRoutes() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setTimedOut(true)
-    }, 3000)
+    }, 5000)
     return () => clearTimeout(timer)
   }, [])
 
