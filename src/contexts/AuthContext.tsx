@@ -20,19 +20,19 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 })
 
-const roleCache: Record<string, Role> = {}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const [role, setRole] = useState<Role>(null)
+  const [role, setRole] = useState<Role>(() => {
+    try {
+      return (localStorage.getItem('user_role') as Role) ?? null
+    } catch {
+      return null
+    }
+  })
   const [loading, setLoading] = useState(true)
 
   const fetchRole = async (userId: string) => {
-    if (roleCache[userId]) {
-      setRole(roleCache[userId])
-      return
-    }
     try {
       const { data } = await supabase
         .from('user_roles')
@@ -40,8 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('user_id', userId)
         .single()
       const r = (data?.role as Role) ?? null
-      roleCache[userId] = r
       setRole(r)
+      try {
+        if (r) localStorage.setItem('user_role', r)
+        else localStorage.removeItem('user_role')
+      } catch {}
     } catch {
       setRole(null)
     }
@@ -56,6 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         await fetchRole(session.user.id)
+      } else {
+        setRole(null)
+        try { localStorage.removeItem('user_role') } catch {}
       }
       if (mounted) setLoading(false)
     })
@@ -70,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await fetchRole(session.user.id)
         } else {
           setRole(null)
+          try { localStorage.removeItem('user_role') } catch {}
         }
         if (mounted) setLoading(false)
       }
@@ -82,12 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOut = async () => {
-    const userId = user?.id
-    if (userId) delete roleCache[userId]
     await supabase.auth.signOut()
     setUser(null)
     setSession(null)
     setRole(null)
+    try { localStorage.removeItem('user_role') } catch {}
   }
 
   return (
