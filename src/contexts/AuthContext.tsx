@@ -85,9 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try { localStorage.removeItem('user_role') } catch {}
-    try { localStorage.clear() } catch {}
     await supabase.auth.signOut()
-    // Force full page reload to clear all state
     window.location.href = '/'
   }
 
