@@ -14,6 +14,7 @@ import {
   Clock,
   CreditCard,
   Link,
+  Wallet,
 } from 'lucide-react'
 import AdminHome from './Home'
 import Students from './Students'
@@ -29,7 +30,6 @@ import SchoolCalendar from './SchoolCalendar'
 import Payments from './Payments'
 import LinkParents from './LinkParents'
 import FeeManagement from './FeeManagement'
-import { Wallet } from 'lucide-react'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,14 +38,14 @@ const navItems = [
   { to: '/grades', label: 'Grades', icon: BookOpen },
   { to: '/attendance', label: 'Attendance', icon: ClipboardList },
   { to: '/report-cards', label: 'Report Cards', icon: FileText },
-  { to: '/payments', label: 'Payments', icon: CreditCard },
+  { to: '/payments', label: 'Report Payments', icon: CreditCard },
+  { to: '/fees', label: 'Fee Management', icon: Wallet },
   { to: '/notices', label: 'Notices', icon: Bell },
   { to: '/timetable', label: 'Timetable', icon: Clock },
   { to: '/calendar', label: 'Calendar', icon: Calendar },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/link-parents', label: 'Link Parents', icon: Link },
   { to: '/accounts', label: 'Accounts', icon: UserCog },
-  { to: '/fees', label: 'Fee Management', icon: Wallet },
 ]
 
 export default function AdminDashboard() {
@@ -87,8 +87,13 @@ export default function AdminDashboard() {
         </Layout>
       } />
       <Route path="/payments" element={
-        <Layout navItems={navItems} title="Payments">
+        <Layout navItems={navItems} title="Report Card Payments">
           <Payments />
+        </Layout>
+      } />
+      <Route path="/fees" element={
+        <Layout navItems={navItems} title="Fee Management">
+          <FeeManagement />
         </Layout>
       } />
       <Route path="/notices" element={
@@ -121,11 +126,6 @@ export default function AdminDashboard() {
           <Accounts />
         </Layout>
       } />
-      <Route path="/fees" element={
-      <Layout navItems={navItems} title="Fee Management">
-          <FeeManagement />
-      </Layout>
-      } />
-      </Routes>
+    </Routes>
   )
 }
