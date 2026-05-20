@@ -28,6 +28,8 @@ import Timetable from './Timetable'
 import SchoolCalendar from './SchoolCalendar'
 import Payments from './Payments'
 import LinkParents from './LinkParents'
+import FeeManagement from './FeeManagement'
+import { Wallet } from 'lucide-react'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -43,6 +45,7 @@ const navItems = [
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/link-parents', label: 'Link Parents', icon: Link },
   { to: '/accounts', label: 'Accounts', icon: UserCog },
+  { to: '/fees', label: 'Fee Management', icon: Wallet },
 ]
 
 export default function AdminDashboard() {
@@ -118,6 +121,11 @@ export default function AdminDashboard() {
           <Accounts />
         </Layout>
       } />
-    </Routes>
+      <Route path="/fees" element={
+      <Layout navItems={navItems} title="Fee Management">
+          <FeeManagement />
+      </Layout>
+      } />
+      </Routes>
   )
 }
