@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   role: null,
-  loading: true,
+  loading: false,
   signOut: async () => {},
 })
 
@@ -24,13 +24,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [role, setRole] = useState<Role>(() => {
-    try {
-      return (localStorage.getItem('user_role') as Role) ?? null
-    } catch {
-      return null
-    }
+    try { return (localStorage.getItem('user_role') as Role) ?? null }
+    catch { return null }
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const fetchRole = async (userId: string) => {
     try {
@@ -58,12 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        await fetchRole(session.user.id)
+        fetchRole(session.user.id)
       } else {
         setRole(null)
         try { localStorage.removeItem('user_role') } catch {}
       }
-      if (mounted) setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -73,12 +69,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session)
         setUser(session?.user ?? null)
         if (session?.user) {
-          await fetchRole(session.user.id)
+          fetchRole(session.user.id)
         } else {
           setRole(null)
           try { localStorage.removeItem('user_role') } catch {}
         }
-        if (mounted) setLoading(false)
       }
     )
 
