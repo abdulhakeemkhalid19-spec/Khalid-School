@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
@@ -9,38 +8,21 @@ import TeacherDashboard from './pages/teacher/Dashboard'
 import ParentDashboard from './pages/parent/Dashboard'
 import StudentDashboard from './pages/student/Dashboard'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 10,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 function AppRoutes() {
-  const { user, role, loading } = useAuth()
-  const [timedOut, setTimedOut] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimedOut(true)
-    }, 5000)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (loading && !timedOut) return (
-    <div className="min-h-screen bg-school-dark flex items-center justify-center">
-      <div className="text-white text-center">
-        <div className="text-4xl mb-4">📚</div>
-        <p>Loading...</p>
-      </div>
-    </div>
-  )
+  const { user, role } = useAuth()
 
   if (!user) return <Login />
-
-  if (user && !role && !timedOut) return (
-    <div className="min-h-screen bg-school-dark flex items-center justify-center">
-      <div className="text-white text-center">
-        <div className="text-4xl mb-4">📚</div>
-        <p>Loading...</p>
-      </div>
-    </div>
-  )
 
   if (role === 'admin') return (
     <Routes>
