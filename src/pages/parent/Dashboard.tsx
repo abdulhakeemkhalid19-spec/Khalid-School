@@ -7,6 +7,7 @@ import {
   Clock,
   Calendar,
   Wallet,
+  MessageCircle,
 } from 'lucide-react'
 import ParentHome from './Home'
 import ParentReportCard from './ReportCard'
@@ -14,6 +15,7 @@ import ParentNotices from './Notices'
 import ParentTimetable from './Timetable'
 import ParentCalendar from './Calendar'
 import ParentFees from './Fees'
+import Complaints from './Complaints'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -61,7 +63,9 @@ export default function ParentDashboard() {
       <Route path="/calendar" element={
         <Layout navItems={navItems} title="Calendar">
           <ParentCalendar />
-          <Route path="/complaints" element={
+        </Layout>
+      } />
+      <Route path="/complaints" element={
         <Layout navItems={navItems} title="Contact School">
           <Complaints />
         </Layout>
