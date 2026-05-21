@@ -10,14 +10,15 @@ const EVENT_TYPES = [
   { value: 'closing', label: 'Closing', color: 'bg-yellow-100 text-yellow-700' },
 ]
 
-export default function StudentCalendar() {
+export default function CalendarPage() {
   const { data: events, isLoading } = useQuery({
-    queryKey: ['calendar-events'],
+    queryKey: ['calendar-events-all'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('calendar_events')
         .select('*')
         .order('date', { ascending: true })
+      if (error) throw error
       return data ?? []
     }
   })
@@ -26,15 +27,27 @@ export default function StudentCalendar() {
     return EVENT_TYPES.find(t => t.value === type)?.color ?? 'bg-gray-100 text-gray-700'
   }
 
-  const upcomingEvents = events?.filter((e: any) =>
-    new Date(e.date) >= new Date()
-  ) ?? []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const upcomingEvents = events?.filter((e: any) => {
+    const eventDate = new Date(e.date)
+    eventDate.setHours(0, 0, 0, 0)
+    return eventDate >= today
+  }) ?? []
+
+  const pastEvents = events?.filter((e: any) => {
+    const eventDate = new Date(e.date)
+    eventDate.setHours(0, 0, 0, 0)
+    return eventDate < today
+  }) ?? []
 
   return (
     <div className="space-y-4">
+      {/* Upcoming */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b bg-school-dark text-white">
-          <h3 className="font-semibold">School Calendar</h3>
+          <h3 className="font-semibold">Upcoming Events ({upcomingEvents.length})</h3>
         </div>
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Loading...</div>
@@ -58,7 +71,7 @@ export default function StudentCalendar() {
                     {new Date(event.date).getFullYear()}
                   </p>
                 </div>
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-medium text-sm">{event.title}</h4>
                     <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${getTypeStyle(event.type)}`}>
@@ -68,12 +81,48 @@ export default function StudentCalendar() {
                   {event.description && (
                     <p className="text-xs text-gray-500">{event.description}</p>
                   )}
+                  {event.end_date && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      Ends: {new Date(event.end_date).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Past Events */}
+      {pastEvents.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold text-gray-500">Past Events</h3>
+          </div>
+          <div className="divide-y opacity-60">
+            {pastEvents.map((event: any) => (
+              <div key={event.id} className="p-4 flex gap-4">
+                <div className="text-center min-w-[50px]">
+                  <p className="text-xl font-bold text-gray-400">
+                    {new Date(event.date).getDate()}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(event.date).toLocaleString('default', { month: 'short' })}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium text-sm text-gray-500">{event.title}</h4>
+                    <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${getTypeStyle(event.type)}`}>
+                      {event.type}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
