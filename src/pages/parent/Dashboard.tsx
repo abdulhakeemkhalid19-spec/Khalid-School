@@ -61,6 +61,11 @@ export default function ParentDashboard() {
       <Route path="/calendar" element={
         <Layout navItems={navItems} title="Calendar">
           <ParentCalendar />
+          <Route path="/complaints" element={
+  <Layout navItems={navItems} title="Contact School">
+    <Complaints />
+  </Layout>
+} />
         </Layout>
       } />
     </Routes>
