@@ -1,6 +1,7 @@
 export const SCHOOL_NAME = 'Khalid First Project School'
 export const SCHOOL_LOCATION = 'Muslim Odinjo, Ibadan'
 export const PASS_MARK = 50
+export const SCHOOL_WHATSAPP = '2347041304966' // Change to real number
 
 export const CLASSES = [
   'Prep',
