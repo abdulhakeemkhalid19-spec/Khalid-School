@@ -22,6 +22,7 @@ const navItems = [
   { to: '/notices', label: 'Notices', icon: Bell },
   { to: '/timetable', label: 'Timetable', icon: Clock },
   { to: '/calendar', label: 'Calendar', icon: Calendar },
+  { to: '/complaints', label: 'Contact School', icon: MessageCircle },
 ]
 
 export default function ParentDashboard() {
