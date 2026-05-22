@@ -1,7 +1,8 @@
 export const SCHOOL_NAME = 'Khalid First Project School'
 export const SCHOOL_LOCATION = 'Muslim Odinjo, Ibadan'
+export const SCHOOL_LOGO = '' // Add logo URL here when buyer provides logo
 export const PASS_MARK = 50
-export const SCHOOL_WHATSAPP = '2347041304966' // Change to real number
+export const SCHOOL_WHATSAPP = '2348012345678'
 
 export const CLASSES = [
   'Prep',
@@ -37,7 +38,7 @@ export const GRADES = [
 
 export const BEHAVIOUR_RATINGS = [
   'Excellent',
-  'Good', 
+  'Good',
   'Fair',
   'Poor'
 ] as const
