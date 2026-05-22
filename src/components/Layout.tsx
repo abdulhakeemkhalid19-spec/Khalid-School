@@ -20,7 +20,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { toast } from 'sonner'
-
+import SchoolLogo from './SchoolLogo'
 interface NavItem {
   to: string
   label: string
@@ -48,9 +48,7 @@ export default function Layout({ children, navItems, title }: LayoutProps) {
       {/* Logo */}
       <div className="p-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-            <span className="text-xl">📚</span>
-          </div>
+         <SchoolLogo size={40} />
           <div>
             <p className="text-white font-bold text-sm leading-tight">{SCHOOL_NAME}</p>
             <p className="text-blue-300 text-xs">{SCHOOL_LOCATION}</p>
@@ -121,7 +119,7 @@ export default function Layout({ children, navItems, title }: LayoutProps) {
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 bg-school-dark text-white">
           <div className="flex items-center gap-2">
-            <span className="text-xl">📚</span>
+            <SchoolLogo size={28} />
             <span className="font-bold text-sm">{SCHOOL_NAME}</span>
           </div>
           <button onClick={() => setOpen(true)}>
