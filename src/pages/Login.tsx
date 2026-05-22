@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { SCHOOL_NAME, SCHOOL_LOCATION } from '../lib/constants'
 import { toast } from 'sonner'
+import SchoolLogo from '../components/SchoolLogo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
