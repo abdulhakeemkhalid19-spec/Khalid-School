@@ -65,8 +65,8 @@ export default function Login() {
     <div className="min-h-screen bg-school-dark flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-full mb-4">
-           <span className="text-4xl">📚</span>
+        <div className="flex justify-center mb-4">
+          <SchoolLogo size={80} />
         </div>
           <h1 className="text-2xl font-bold text-white">{SCHOOL_NAME}</h1>
           <p className="text-blue-300 text-sm mt-1">{SCHOOL_LOCATION}</p>
