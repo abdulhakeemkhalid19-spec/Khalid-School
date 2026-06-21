@@ -31,6 +31,7 @@ import Payments from './Payments'
 import LinkParents from './LinkParents'
 import FeeManagement from './FeeManagement'
 import PaymentList from './PaymentList'
+import PTACommittee from './PTACommittee'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -43,6 +44,7 @@ const navItems = [
   { to: '/payment-list', label: 'Payment List', icon: Wallet },
   { to: '/fees', label: 'Fee Management', icon: Wallet },
   { to: '/notices', label: 'Notices', icon: Bell },
+  { to: '/pta-committee', label: 'PTA Committee', icon: Users },
   { to: '/timetable', label: 'Timetable', icon: Clock },
   { to: '/calendar', label: 'Calendar', icon: Calendar },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
@@ -108,6 +110,11 @@ export default function AdminDashboard() {
           <Notices />
         </Layout>
       } />
+      <Route path="/pta-committee" element={
+        <Layout navItems={navItems} title="PTA Committee">
+          <PTACommittee />
+        </Layout>
+      } />
       <Route path="/timetable" element={
         <Layout navItems={navItems} title="Timetable">
           <Timetable />
@@ -135,4 +142,4 @@ export default function AdminDashboard() {
       } />
     </Routes>
   )
-}
+          }
