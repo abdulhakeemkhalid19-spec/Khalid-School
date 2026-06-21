@@ -21,10 +21,12 @@ interface Student {
   genotype?: string
   allergies?: string
   medical_conditions?: string
+  admission_date?: string
+  admission_time?: string
+  admission_no?: string
 }
 
-const isSecondary = (cls: string) =>
-  cls.startsWith('SS')
+const isSecondary = (cls: string) => cls.startsWith('SS')
 
 export default function Students() {
   const qc = useQueryClient()
@@ -37,10 +39,7 @@ export default function Students() {
   const { data: students, isLoading } = useQuery({
     queryKey: ['students'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('students')
-        .select('*')
-        .order('full_name')
+      const { data } = await supabase.from('students').select('*').order('full_name')
       return data ?? []
     }
   })
@@ -48,15 +47,10 @@ export default function Students() {
   const saveMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => {
       if (editing) {
-        const { error } = await supabase
-          .from('students')
-          .update(data)
-          .eq('id', editing.id)
+        const { error } = await supabase.from('students').update(data).eq('id', editing.id)
         if (error) throw error
       } else {
-        const { error } = await supabase
-          .from('students')
-          .insert(data)
+        const { error } = await supabase.from('students').insert(data)
         if (error) throw error
       }
     },
@@ -72,10 +66,7 @@ export default function Students() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('students')
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from('students').delete().eq('id', id)
       if (error) throw error
     },
     onSuccess: () => {
@@ -107,7 +98,6 @@ export default function Students() {
 
   return (
     <div className="space-y-4">
-      {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-3 text-gray-400" />
@@ -137,19 +127,17 @@ export default function Students() {
         </button>
       </div>
 
-      {/* Students Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Loading...</div>
         ) : filtered?.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
-            <p>No students found</p>
-          </div>
+          <div className="p-8 text-center text-gray-400"><p>No students found</p></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-school-dark text-white">
                 <tr>
+                  <th className="text-left p-3 text-sm">Admission No.</th>
                   <th className="text-left p-3 text-sm">Name</th>
                   <th className="text-left p-3 text-sm">Class</th>
                   <th className="text-left p-3 text-sm">Gender</th>
@@ -160,24 +148,18 @@ export default function Students() {
               <tbody>
                 {filtered?.map((s: Student) => (
                   <tr key={s.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3 text-sm">{s.admission_no ?? '—'}</td>
                     <td className="p-3 text-sm font-medium">{s.full_name}</td>
                     <td className="p-3 text-sm">{s.class}</td>
                     <td className="p-3 text-sm">{s.gender}</td>
                     <td className="p-3 text-sm">{s.department ?? '—'}</td>
                     <td className="p-3">
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => openEdit(s)}
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded"
-                        >
+                        <button onClick={() => openEdit(s)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded">
                           <Edit size={15} />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm('Delete this student?')) {
-                              deleteMutation.mutate(s.id)
-                            }
-                          }}
+                          onClick={() => { if (confirm('Delete this student?')) deleteMutation.mutate(s.id) }}
                           className="p-1.5 text-red-500 hover:bg-red-50 rounded"
                         >
                           <Trash2 size={15} />
@@ -192,7 +174,6 @@ export default function Students() {
         )}
       </div>
 
-      {/* Add/Edit Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -205,11 +186,42 @@ export default function Students() {
               </button>
             </div>
             <div className="p-6 space-y-4">
+              <div className="bg-blue-50 rounded-lg p-3">
+                <p className="text-xs font-semibold text-blue-700 mb-2">Admission Details</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Admission No.</label>
+                    <input
+                      value={form.admission_no ?? ''}
+                      onChange={(e) => setForm({ ...form, admission_no: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
+                      placeholder="e.g. KFP/2024/001"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Date of Admission</label>
+                    <input
+                      type="date"
+                      value={form.admission_date ?? ''}
+                      onChange={(e) => setForm({ ...form, admission_date: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Time of Admission</label>
+                    <input
+                      type="time"
+                      value={form.admission_time ?? ''}
+                      onChange={(e) => setForm({ ...form, admission_time: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                   <input
                     value={form.full_name ?? ''}
                     onChange={(e) => setForm({ ...form, full_name: e.target.value })}
@@ -218,9 +230,7 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Age
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                   <input
                     type="number"
                     value={form.age ?? ''}
@@ -230,24 +240,18 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Class *</label>
                   <select
                     value={form.class ?? ''}
                     onChange={(e) => setForm({ ...form, class: e.target.value })}
                     className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
                   >
                     <option value="">Select Class</option>
-                    {CLASSES.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                    {CLASSES.map(c => (<option key={c} value={c}>{c}</option>))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
                   <select
                     value={form.gender ?? ''}
                     onChange={(e) => setForm({ ...form, gender: e.target.value })}
@@ -260,25 +264,19 @@ export default function Students() {
                 </div>
                 {isSecondary(form.class ?? '') && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Department
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
                     <select
                       value={form.department ?? ''}
                       onChange={(e) => setForm({ ...form, department: e.target.value })}
                       className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
                     >
                       <option value="">Select Department</option>
-                      {DEPARTMENTS.map(d => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
+                      {DEPARTMENTS.map(d => (<option key={d} value={d}>{d}</option>))}
                     </select>
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Student Email
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Student Email</label>
                   <input
                     type="email"
                     value={form.student_email ?? ''}
@@ -288,9 +286,7 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parent Email
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Parent Email</label>
                   <input
                     type="email"
                     value={form.parent_email ?? ''}
@@ -300,9 +296,7 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parent Phone
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Parent Phone</label>
                   <input
                     value={form.parent_phone ?? ''}
                     onChange={(e) => setForm({ ...form, parent_phone: e.target.value })}
@@ -311,9 +305,7 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Hobby
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Hobby</label>
                   <input
                     value={form.hobby ?? ''}
                     onChange={(e) => setForm({ ...form, hobby: e.target.value })}
@@ -322,9 +314,7 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Club
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Club</label>
                   <input
                     value={form.club ?? ''}
                     onChange={(e) => setForm({ ...form, club: e.target.value })}
@@ -333,9 +323,7 @@ export default function Students() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Blood Group
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
                   <select
                     value={form.blood_group ?? ''}
                     onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
@@ -348,24 +336,18 @@ export default function Students() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Genotype
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Genotype</label>
                   <select
                     value={form.genotype ?? ''}
                     onChange={(e) => setForm({ ...form, genotype: e.target.value })}
                     className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-dark"
                   >
                     <option value="">Select</option>
-                    {['AA', 'AS', 'SS', 'AC'].map(g => (
-                      <option key={g} value={g}>{g}</option>
-                    ))}
+                    {['AA', 'AS', 'SS', 'AC'].map(g => (<option key={g} value={g}>{g}</option>))}
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Allergies
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Allergies</label>
                   <input
                     value={form.allergies ?? ''}
                     onChange={(e) => setForm({ ...form, allergies: e.target.value })}
@@ -374,9 +356,7 @@ export default function Students() {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Medical Conditions
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Medical Conditions</label>
                   <textarea
                     value={form.medical_conditions ?? ''}
                     onChange={(e) => setForm({ ...form, medical_conditions: e.target.value })}
@@ -407,4 +387,4 @@ export default function Students() {
       )}
     </div>
   )
-}
+        }
