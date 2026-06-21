@@ -30,6 +30,7 @@ import SchoolCalendar from './SchoolCalendar'
 import Payments from './Payments'
 import LinkParents from './LinkParents'
 import FeeManagement from './FeeManagement'
+import PaymentList from './PaymentList'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -39,6 +40,7 @@ const navItems = [
   { to: '/attendance', label: 'Attendance', icon: ClipboardList },
   { to: '/report-cards', label: 'Report Cards', icon: FileText },
   { to: '/payments', label: 'Report Payments', icon: CreditCard },
+  { to: '/payment-list', label: 'Payment List', icon: Wallet },
   { to: '/fees', label: 'Fee Management', icon: Wallet },
   { to: '/notices', label: 'Notices', icon: Bell },
   { to: '/timetable', label: 'Timetable', icon: Clock },
@@ -89,6 +91,11 @@ export default function AdminDashboard() {
       <Route path="/payments" element={
         <Layout navItems={navItems} title="Report Card Payments">
           <Payments />
+        </Layout>
+      } />
+      <Route path="/payment-list" element={
+        <Layout navItems={navItems} title="Payment List">
+          <PaymentList />
         </Layout>
       } />
       <Route path="/fees" element={
